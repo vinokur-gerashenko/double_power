@@ -1,0 +1,12 @@
+{
+  "autoload": {
+    "psr-0": {
+      "Test":  "src/",
+      "Framework": "vendor/",
+      "App":   "app/"
+    },
+    "files": [
+      "web/index.php"
+    ]
+  }
+}
