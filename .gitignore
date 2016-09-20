@@ -1,5 +1,7 @@
 tmp/
 .idea
-app/config/config.php
+App/config/config.php
+App/config/dbConfig.php
 vendor/autoload.php
 vendor/composer
+test.php
