@@ -3,54 +3,86 @@
 namespace Framework\Database\Engine;
 
 
-
 use Framework\Services\Service;
 
-class AbstractDbEngine implements DBEngineInterface
+abstract class AbstractDbEngine implements DBEngineInterface
 {
-    protected $host;
 
-    protected $userName;
 
-    protected $password;
+    protected $dbConfig;
 
-    protected $dbName;
+    protected $connection;
 
     public function __construct()
     {
-        $dbConfig = Service::get('config')['db'];
-
-        $this->host = $dbConfig['host'];
-
-        $this->userName = $dbConfig['user_name'];
-
-        $this->password = $dbConfig['password'];
-
-        $this->dbName = $dbConfig['db_name'];
+        $this->dbConfig = Service::get('config')['db'];
     }
 
-    public static function select($tableName, array $displayParams, array $searchParams = array())
+    public function select($tableName, array $displayParams, array $searchParams = array())
     {
-        // TODO: Implement select() method.
+        $sql = "SELECT {$this->prepareDisplayParams($displayParams)} FROM $tableName";
+
+        if (count($searchParams)) {
+            $sql .= " WHERE {$this->prepareSearchParams($searchParams)}";
+        }
+
+        return $this->selectQuery($sql);
     }
 
-    public static function insert($tableName, array $insertParams)
+    public function insert($tableName, array $insertParams)
     {
-        // TODO: Implement insert() method.
+        $readyParams = $this->prepareInsertParams($insertParams);
+        $sql = "INSERT INTO $tableName ({$readyParams['readyKeys']}) VALUES ({$readyParams['readyValues']})";
+        return $this->query($sql);
     }
 
-    public static function delete($tableName, array $searchParams)
+    public function delete($tableName, array $searchParams)
     {
         // TODO: Implement delete() method.
     }
 
-    public static function update($tableName, array $searchParams, array $updateParams)
+    public function update($tableName, array $searchParams, array $updateParams)
     {
         // TODO: Implement update() method.
     }
 
-    public static function query($query)
+    abstract public function query($query);
+    abstract public function selectQuery($query);
+
+    protected function cleanParams(array $params)
     {
-        // TODO: Implement query() method.
+        return $params;
+    }
+
+    protected function prepareDisplayParams(array $params)
+    {
+        return implode(', ', $params);
+    }
+
+    protected function prepareSearchParams(array $searchParams)
+    {
+        $searchParams = $this->cleanParams($searchParams);
+
+        $readyParams = '';
+        foreach ($searchParams as $key => $value) {
+            $readyParams .= " $key=$value AND ";
+        }
+
+        return chop($readyParams, 'AND ');
+    }
+
+    protected function prepareInsertParams(array $params)
+    {
+        $params = $this->cleanParams($params);
+        $keys = [];
+        $values = [];
+        foreach ($params as $key => $value) {
+            $keys[] = $key;
+            $values[] = $value;
+        }
+        return [
+            'readyKeys'   => implode(', ', $keys),
+            'readyValues' => implode(', ', $values)
+        ];
     }
 }
