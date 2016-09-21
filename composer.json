@@ -3,7 +3,7 @@
     "psr-0": {
       "Test":  "src/",
       "Framework": "vendor/",
-      "App":   "app/"
+      "App":   ""
     },
     "files": [
       "web/index.php"

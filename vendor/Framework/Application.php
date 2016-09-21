@@ -4,6 +4,7 @@ namespace Framework;
 
 use Framework\Services\Service;
 use Framework\Services\Session;
+use Framework\Router\Router;
 
 class Application {
 
@@ -14,12 +15,11 @@ class Application {
 
         self::$config = $config;
         self::$config['app_path'] = realpath(__DIR__ . '/../../');
-        $service = Service::getInstance();
-
         $session = new Session();
+        $service = Service::getInstance();
         $service::set('session', $session);
         $service::set('config', self::$config);
 
-        //self::$router = Router::getInstance();
+        self::$router = Router::getInstance();
     }
 }

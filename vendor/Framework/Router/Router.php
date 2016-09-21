@@ -1,8 +1,9 @@
 <?php
 
-namespace Yurii\Router;
+namespace Framework\Router;
 
 use Framework\Services\Service;
+use Framework\Exception\RouterException;
 
 class Router {
     private static $instance;
@@ -16,9 +17,9 @@ class Router {
         return self::$instance;
     }
 
-    public function addRoutes($routing_map) {
-        self::$map = $routing_map;
-    }
+    //public function addRoutes($routing_map) {
+    //    self::$map = $routing_map;
+    //}
 
     private function writeRoutes($routingMap) {
         $jsonMap = json_encode($routingMap);
@@ -38,7 +39,7 @@ class Router {
 
         self::$routePath = Service::get('config')['app_path'];
         $env    = Service::get('config')['mode'];
-        $engine = Service::get('config')['routing_engine'];
+        $engine = isset(Service::get('config')['routing_engine']) ? Service::get('config')['routing_engine'] : null;
         $routes = null;
 
         if($env == 'prod') {
@@ -47,21 +48,28 @@ class Router {
 
         if (is_null($routes)) {
             $routingConfigMap = Service::get('config')['routes'];
-            $routingAnnotationMap = array();
 
-            if ($engine == 'annotation') {
-                $routingAnnotationMap = ParseAnnotations::getRoutes();
+            $additional_routes = array();
+            if (!is_null($engine)) {
+                $class = ucfirst(strtolower($engine)) . 'Parser';
+                if (class_exists($class) && $class instanceof RouterParseInterface) {
+                    $additional_routes = $class::getRoutes();
+                }
+                else {
+                    throw new RouterException('Engine: ' . $engine . ' does not exists or class: ' . $class .
+                    ' does not implements RouterParseInterface.');
+                }
             }
 
-            $routingMap = array_merge($routingConfigMap, $routingAnnotationMap);
+            $routingMap = array_merge($routingConfigMap, $additional_routes);
 
             if ($env == 'prod') {
                 $this->writeRoutes($routingMap);
             }
-            $this->addRoutes($routingMap);
+            self::$map = $routingMap;
         }
         else {
-            $this->addRoutes($routes);
+            self::$map = $routes;
         }
     }
 

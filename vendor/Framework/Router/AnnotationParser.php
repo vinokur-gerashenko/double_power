@@ -4,11 +4,11 @@ namespace Framework\Router;
 
 use Framework\Services\Service;
 
-class AnnotationsParser {
+class AnnotationsParser implements RouterParseInterface {
     private static $namespaces = array();
 
     public static function getRoutes() {
-        self::$namespaces = ServiceFactory::get('config')->getConfig('namespaces');
+        self::$namespaces = Service::get('config')['modules'];
 
         $path = realpath(__DIR__ . '/../../../src/');
         $controllerAppDir = realpath(__DIR__ . '/../../../App/Controllers');
