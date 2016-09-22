@@ -10,7 +10,7 @@ class MainException extends \Exception {
     private $logger;
 
     public function __construct($message, $code = null) {
-        $this->logger = Service::get('logger', );
+        $this->logger = Service::get('logger' );
         $this->logger->addLog(__CLASS__ . ': ' . $message, $this->type);
         parent::__construct($message, $code);
     }

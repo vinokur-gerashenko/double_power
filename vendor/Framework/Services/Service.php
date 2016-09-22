@@ -2,27 +2,20 @@
 
 namespace Framework\Services;
 
-class Service {
-    private static $instance;
+use Framework\Exception\ServiceException;
+
+class Service extends AbstractService {
     private static $services = array();
+    private static $prefix = 'Framework\\Services\\';
 
-    public static function getInstance() {
-        if(empty(self::$instance)) {
-            self::$instance = new self();
+    public static function get($service) {
+        $service = self::$prefix . ucfirst(strtolower($service));
+
+        if (class_exists($service)) {
+            return $service::getInstance();
         }
-        return self::$instance;
-    }
-
-    public static function set($name, $value) {
-        if( !isset( self::$services[$name])) {
-            self::$services[$name] = $value;
+        else {
+            throw new ServiceException('Service: ' . $service . ' does not exists.');
         }
     }
-
-    public static function get($name) {
-        return self::$services[$name];
-    }
-
-    private function __construct() { /* close */ }
-    private function __clone() { /* close */ }
 }
